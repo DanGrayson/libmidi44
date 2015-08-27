@@ -1,1 +1,1 @@
-gcc midicat.c -framework CoreAudio -framework CoreMIDI -o midicat
+gcc midicat.c -g -framework CoreAudio -framework CoreMIDI -framework CoreFoundation -o midicat

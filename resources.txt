@@ -1,3 +1,5 @@
 https://developer.apple.com/library/ios/documentation/MusicAudio/Conceptual/CoreAudioOverview/CoreAudioFrameworks/CoreAudioFrameworks.html
 
 https://developer.apple.com/library/prerelease/ios/documentation/MusicAudio/Reference/CACoreMIDIRef/index.html
+
+https://developer.apple.com/library/ios/documentation/CoreMidi/Reference/MIDIServices_Reference/
