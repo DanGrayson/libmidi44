@@ -1,6 +1,22 @@
 #include <stdio.h>
 #include <CoreMIDI/MIDIServices.h>
 #include <CoreServices/CoreServices.h>
+#include <CoreServices/CoreServices.h>
+#include <mach/mach.h>
+#include <mach/mach_time.h>
+
+uint64_t AbsToNs(uint64_t absolute_time)
+{
+    static mach_timebase_info_data_t info = { 0 };
+
+    if (info.denom == 0)
+    {
+        mach_timebase_info(&info);
+    }
+
+    uint64_t nanoseconds = absolute_time * info.numer / info.denom;
+    return nanoseconds;
+}
 
 void read_callback(const MIDIPacketList *pktlist, void * port_ref, void * src_ref)
 {
@@ -8,16 +24,21 @@ void read_callback(const MIDIPacketList *pktlist, void * port_ref, void * src_re
     {
         const MIDIPacket * packet = pktlist->packet + i;
 
+        if (packet->length == 1 && packet->data[0] == 0xfe)
+        {
+            // Suppress keep alive messages.
+            continue;
+        }
+
         // This annoying code to conver the time stamp to nanoseconds comes from Apple:
         // https://developer.apple.com/library/mac/qa/qa1398/_index.html
-        Nanoseconds ns_struct = AbsoluteToNanoseconds(*(AbsoluteTime *)&packet->timeStamp);
-        uint64_t ns = *(uint64_t *)&ns_struct;
+        uint64_t ns = AbsToNs(packet->timeStamp);
         uint64_t ms = ns / 1000000;
 
         printf("%lld: ", ms);
         for(uint32_t j = 0; j < packet->length; j++)
         {
-            printf("%02X ", packet->data[j]);
+            printf("%02x ", packet->data[j]);
         }
         printf("\n");
     }
