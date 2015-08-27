@@ -12,7 +12,7 @@ void  __attribute__((constructor)) timebase_info_init()
     mach_timebase_info(&timebase_info);
 }
 
-uint64_t AbsToNs(uint64_t absolute_time)
+uint64_t abs_to_ns(uint64_t absolute_time)
 {
     uint64_t nanoseconds = (__uint128_t)absolute_time * timebase_info.numer / timebase_info.denom;
     return nanoseconds;
@@ -30,7 +30,7 @@ void read_callback(const MIDIPacketList *pktlist, void * port_ref, void * src_re
             continue;
         }
 
-        uint64_t ns = AbsToNs(packet->timeStamp);
+        uint64_t ns = abs_to_ns(packet->timeStamp);
         uint64_t ms = ns / 1000000;
 
         printf("%lld: ", ms);
