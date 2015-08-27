@@ -5,16 +5,16 @@
 #include <mach/mach.h>
 #include <mach/mach_time.h>
 
+mach_timebase_info_data_t timebase_info = { 0 };
+
+void  __attribute__((constructor)) timebase_info_init()
+{
+    mach_timebase_info(&timebase_info);
+}
+
 uint64_t AbsToNs(uint64_t absolute_time)
 {
-    static mach_timebase_info_data_t info = { 0 };
-
-    if (info.denom == 0)
-    {
-        mach_timebase_info(&info);
-    }
-
-    uint64_t nanoseconds = absolute_time * info.numer / info.denom;
+    uint64_t nanoseconds = (__uint128_t)absolute_time * timebase_info.numer / timebase_info.denom;
     return nanoseconds;
 }
 
@@ -30,8 +30,6 @@ void read_callback(const MIDIPacketList *pktlist, void * port_ref, void * src_re
             continue;
         }
 
-        // This annoying code to conver the time stamp to nanoseconds comes from Apple:
-        // https://developer.apple.com/library/mac/qa/qa1398/_index.html
         uint64_t ns = AbsToNs(packet->timeStamp);
         uint64_t ms = ns / 1000000;
 
@@ -65,6 +63,8 @@ int main(int argc, char ** argv)
     }
 
     ItemCount count = MIDIGetNumberOfSources();
+
+    bool connected = false;
     for (ItemCount i = 0; i < count; i++)
     {
         MIDIEndpointRef source = MIDIGetSource(i);
@@ -78,10 +78,16 @@ int main(int argc, char ** argv)
         err = MIDIPortConnectSource(port, source, NULL);
         if (err)
         {
-            fprintf(stderr, "Failed to connect to source.");
-            return 1;
+            fprintf(stderr, "Failed to connect to a MIDI source.");
         }
-        printf("connected to a MIDI source\n");
+
+        connected = true;
+    }
+
+    if (!connected)
+    {
+        fprintf(stderr, "Failed to connect to any MIDI sources.");
+        return 1;
     }
 
     while(1)
