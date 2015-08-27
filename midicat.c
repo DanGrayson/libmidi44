@@ -64,7 +64,13 @@ int main(int argc, char ** argv)
 
     ItemCount count = MIDIGetNumberOfSources();
 
-    bool connected = false;
+    if (count == 0)
+    {
+        fprintf(stderr, "No MIDI sources found.\n");
+        return 1;
+    }
+
+    uint8_t connected = false;
     for (ItemCount i = 0; i < count; i++)
     {
         MIDIEndpointRef source = MIDIGetSource(i);
@@ -78,7 +84,7 @@ int main(int argc, char ** argv)
         err = MIDIPortConnectSource(port, source, NULL);
         if (err)
         {
-            fprintf(stderr, "Failed to connect to a MIDI source.");
+            fprintf(stderr, "Failed to connect to a MIDI source.\n");
         }
 
         connected = true;
@@ -86,7 +92,7 @@ int main(int argc, char ** argv)
 
     if (!connected)
     {
-        fprintf(stderr, "Failed to connect to any MIDI sources.");
+        fprintf(stderr, "Failed to connect to any MIDI sources.\n");
         return 1;
     }
 
