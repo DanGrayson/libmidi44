@@ -1,9 +1,26 @@
 #include <stdio.h>
 #include <CoreMIDI/MIDIServices.h>
+#include <CoreServices/CoreServices.h>
 
 void read_callback(const MIDIPacketList *pktlist, void * port_ref, void * src_ref)
 {
-    printf("got a list of packets\n");
+    for (uint32_t i = 0; i < pktlist->numPackets; i++)
+    {
+        const MIDIPacket * packet = pktlist->packet + i;
+
+        // This annoying code to conver the time stamp to nanoseconds comes from Apple:
+        // https://developer.apple.com/library/mac/qa/qa1398/_index.html
+        Nanoseconds ns_struct = AbsoluteToNanoseconds(*(AbsoluteTime *)&packet->timeStamp);
+        uint64_t ns = *(uint64_t *)&ns_struct;
+        uint64_t ms = ns / 1000000;
+
+        printf("%lld: ", ms);
+        for(uint32_t j = 0; j < packet->length; j++)
+        {
+            printf("%02X ", packet->data[j]);
+        }
+        printf("\n");
+    }
 }
 
 int main(int argc, char ** argv)
@@ -44,6 +61,11 @@ int main(int argc, char ** argv)
             return 1;
         }
         printf("connected to a MIDI source\n");
+    }
+
+    while(1)
+    {
+        usleep(1000000);
     }
 
     return 0;
