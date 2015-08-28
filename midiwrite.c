@@ -9,8 +9,17 @@
 #define NOTE_OFF 0x80
 #define NOTE_ON  0x90
 #define MODE_MESSAGE 0xb0
-
+#define bank_select_MSB 0x00
+#define bank_select_LSB 0x20
 #define all_sound_off 0x78
+#define all_notes_off 0x7b
+
+#define PROGRAM_CHANGE 0xc0
+
+
+/* Yamaha instruments */
+#define I_GRAND_PIANO 0
+#define I_JAZZ_ORGAN 16
 
 #define bottom_A 0x15
 #define middle_C 0x3c
@@ -31,13 +40,19 @@ static void send (MIDIPacketList *p) {
      chk("send packet list",MIDISend(port,dest,p));
      }
 
-static void sendpacket (int a, int b, int c) {
+static void sendpacket2 (int a, int b) {
+     MIDIPacketList packetlist = { 1, { 0, 2, { a,b } } } ;
+     send(&packetlist);
+     }
+
+static void sendpacket3 (int a, int b, int c) {
      MIDIPacketList packetlist = { 1, { 0, 3, { a,b,c } } } ;
      send(&packetlist);
      }
 
-static void play (key,velocity) { sendpacket(NOTE_ON, key, velocity); }
-static void release (key) { sendpacket(NOTE_OFF, key, 0); }
+static void play (key,velocity) { sendpacket3(NOTE_ON, key, velocity); }
+static void release (key) { sendpacket3(NOTE_OFF, key, 0); }
+static void program_change (instrument) { sendpacket2(PROGRAM_CHANGE,instrument); }
 
 static void p(key,velocity) {
      play (key, velocity);
@@ -75,7 +90,9 @@ int main(int argc, char ** argv)
         return ERROR;
     }
     
-    sendpacket(MODE_MESSAGE, all_sound_off, 0);
+    sendpacket3(MODE_MESSAGE, all_sound_off, 0);
+    /* program_change(I_JAZZ_ORGAN); */
+    program_change(I_GRAND_PIANO);
 
     while (TRUE) {
 	 int key = middle_C - 2*octave;
