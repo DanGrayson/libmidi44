@@ -1,24 +1,27 @@
 #include <stdio.h>
 #include <CoreMIDI/MIDIServices.h>
 #include <CoreServices/CoreServices.h>
-#include <CoreServices/CoreServices.h>
 #include <mach/mach.h>
 #include <mach/mach_time.h>
 
-mach_timebase_info_data_t timebase_info = { 0 };
+/* return codes */
+#define ERROR 1
+#define NO_ERROR 0
 
-void  __attribute__((constructor)) timebase_info_init()
+static mach_timebase_info_data_t timebase_info;
+
+static void  __attribute__((constructor)) timebase_info_init()
 {
     mach_timebase_info(&timebase_info);
 }
 
-uint64_t abs_to_ns(uint64_t absolute_time)
+static uint64_t abs_to_ns(uint64_t absolute_time)
 {
     uint64_t nanoseconds = (__uint128_t)absolute_time * timebase_info.numer / timebase_info.denom;
     return nanoseconds;
 }
 
-void read_callback(const MIDIPacketList *pktlist, void * port_ref, void * src_ref)
+static void read_callback(const MIDIPacketList *pktlist, void * port_ref, void * src_ref)
 {
     for (uint32_t i = 0; i < pktlist->numPackets; i++)
     {
@@ -47,19 +50,19 @@ int main(int argc, char ** argv)
     OSStatus err;
 
     MIDIClientRef client;
-    err = MIDIClientCreate(CFSTR("midicat"), NULL, NULL, &client);
+    err = MIDIClientCreate(CFSTR("midiread"), NULL, NULL, &client);
     if (err)
     {
         fprintf(stderr, "Failed to create client.  Error code %d.\n", err);
-        return 1;
+        return ERROR;
     }
 
     MIDIPortRef port;
-    err = MIDIInputPortCreate(client, CFSTR("midicat in"), read_callback, NULL, &port);
+    err = MIDIInputPortCreate(client, CFSTR("midiread in"), read_callback, NULL, &port);
     if (err)
     {
-        fprintf(stderr, "Failed to create client.  Error code %d.\n", err);
-        return 1;
+        fprintf(stderr, "Failed to create port.  Error code %d.\n", err);
+        return ERROR;
     }
 
     ItemCount count = MIDIGetNumberOfSources();
@@ -67,7 +70,7 @@ int main(int argc, char ** argv)
     if (count == 0)
     {
         fprintf(stderr, "No MIDI sources found.\n");
-        return 1;
+        return ERROR;
     }
 
     uint8_t connected = false;
@@ -93,13 +96,13 @@ int main(int argc, char ** argv)
     if (!connected)
     {
         fprintf(stderr, "Failed to connect to any MIDI sources.\n");
-        return 1;
+        return ERROR;
     }
 
-    while(1)
+    while (TRUE)
     {
-        usleep(1000000);
+        sleep(1000000);
     }
 
-    return 0;
+    return NO_ERROR;
 }
