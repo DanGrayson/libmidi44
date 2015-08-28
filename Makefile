@@ -1,4 +1,4 @@
 CFLAGS += -g
 LDFLAGS +=  -framework CoreMIDI -framework CoreServices
-all: midicat
-clean:; rm -rf midicat midicat.dSYM
+all: midiread midiwrite
+clean:; rm -rf midiread midiwrite *.dSYM
