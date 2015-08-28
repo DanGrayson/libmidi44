@@ -47,7 +47,7 @@ int main(int argc, char ** argv)
     OSStatus err;
 
     MIDIClientRef client;
-    err = MIDIClientCreate(CFSTR("midicat"), NULL, NULL, &client);
+    err = MIDIClientCreate(CFSTR("midiread"), NULL, NULL, &client);
     if (err)
     {
         fprintf(stderr, "Failed to create client.  Error code %d.\n", err);
@@ -55,7 +55,7 @@ int main(int argc, char ** argv)
     }
 
     MIDIPortRef port;
-    err = MIDIInputPortCreate(client, CFSTR("midicat in"), read_callback, NULL, &port);
+    err = MIDIInputPortCreate(client, CFSTR("midiread in"), read_callback, NULL, &port);
     if (err)
     {
         fprintf(stderr, "Failed to create client.  Error code %d.\n", err);
