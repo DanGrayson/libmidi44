@@ -1,3 +1,4 @@
 midiread
 midiwrite
 *.dSYM
+*.o

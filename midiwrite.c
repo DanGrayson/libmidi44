@@ -69,6 +69,4 @@ int main(int argc, char ** argv)
 	 p(key+2*octave, 0x38);
 	 p(key+3*octave, 0x28);
 	 }
-	 
-    return NO_ERROR;
 }

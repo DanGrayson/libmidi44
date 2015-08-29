@@ -30,20 +30,10 @@ int main(int argc, char ** argv)
     OSStatus err;
 
     MIDIClientRef client;
-    err = MIDIClientCreate(CFSTR("midiread"), NULL, NULL, &client);
-    if (err)
-    {
-        fprintf(stderr, "Failed to create client.  Error code %d.\n", err);
-        return ERROR;
-    }
+    chk("create client",MIDIClientCreate(CFSTR("midiread"), NULL, NULL, &client));
 
     MIDIPortRef port;
-    err = MIDIInputPortCreate(client, CFSTR("midiread in"), read_callback, NULL, &port);
-    if (err)
-    {
-        fprintf(stderr, "Failed to create port.  Error code %d.\n", err);
-        return ERROR;
-    }
+    chk("create port",MIDIInputPortCreate(client, CFSTR("midiread in"), read_callback, NULL, &port));
 
     ItemCount count = MIDIGetNumberOfSources();
 
@@ -63,13 +53,7 @@ int main(int argc, char ** argv)
             // Ignore this condition.
             continue;
         }
-
-        err = MIDIPortConnectSource(port, source, NULL);
-        if (err)
-        {
-            fprintf(stderr, "Failed to connect to a MIDI source.\n");
-        }
-
+        chk("connect to a MIDI source",MIDIPortConnectSource(port, source, NULL));
         connected = true;
     }
 
@@ -83,6 +67,4 @@ int main(int argc, char ** argv)
     {
         sleep(1000000);
     }
-
-    return NO_ERROR;
 }
