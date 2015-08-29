@@ -1,25 +1,5 @@
 #include <stdio.h>
-#include <CoreMIDI/MIDIServices.h>
-#include <CoreServices/CoreServices.h>
-#include <mach/mach.h>
-#include <mach/mach_time.h>
-
-/* return codes */
-#define ERROR 1
-#define NO_ERROR 0
-
-static mach_timebase_info_data_t timebase_info;
-
-static void  __attribute__((constructor)) timebase_info_init()
-{
-    mach_timebase_info(&timebase_info);
-}
-
-static uint64_t abs_to_ns(uint64_t absolute_time)
-{
-    uint64_t nanoseconds = (__uint128_t)absolute_time * timebase_info.numer / timebase_info.denom;
-    return nanoseconds;
-}
+#include "midi.h"
 
 static void read_callback(const MIDIPacketList *pktlist, void * port_ref, void * src_ref)
 {
